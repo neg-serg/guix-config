@@ -4,6 +4,8 @@
 (define-module (system vm-config)
   #:use-module (guix gexp)
   #:use-module (gnu)
+  #:use-module (gnu packages linux)      ; NEW IMPORT for linux-libre
+  #:use-module (gnu services networking) ; NEW IMPORT for dhcp-client-configuration
   #:use-module (gnu services spice))
 
 (use-service-modules desktop networking ssh xorg)
@@ -51,15 +53,16 @@
                     %base-packages))
 
   ;; System Services
-  (services (append (list 
+  (services (append (list
                           ;; SSH access
                           (service openssh-service-type)
-                          
-                          ;; Networking via DHCP
-                          (service dhcp-client-service-type)
+
+                          ;; Networking via DHCP (Updated for modern Guix)
+                          (service static-networking-service-type
+                                   (list (dhcp-client-configuration)))
 
                           ;; Spice Agent: Critical for Copy/Paste and auto-resizing in QEMU
                           (service spice-vdagent-service-type))
-                    
+
                     ;; Standard desktop services (includes graphical interface, login manager, etc.)
                     %desktop-services)))
