@@ -6,6 +6,7 @@
   #:use-module (gnu)
   #:use-module (gnu packages linux)      ; NEW IMPORT for linux-libre
   #:use-module (gnu services networking) ; NEW IMPORT for dhcp-client-configuration
+#:use-module (gnu packages certs)      ; NEW IMPORT for nss-certs
   #:use-module (gnu services spice))
 
 (use-service-modules desktop networking ssh xorg)
