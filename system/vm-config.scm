@@ -5,12 +5,23 @@
   #:use-module (guix gexp)
   #:use-module (gnu)
   #:use-module (gnu packages linux)      ; NEW IMPORT for linux-libre
+  #:use-module (gnu packages certs)      ; NEW IMPORT for nss-certs
   #:use-module (gnu services networking) ; NEW IMPORT for dhcp-client-configuration
-#:use-module (gnu packages certs)      ; NEW IMPORT for nss-certs
   #:use-module (gnu services spice))
 
 (use-service-modules desktop networking ssh xorg)
 (use-package-modules bootloaders certs vim curl version-control package-management)
+
+;; Define desktop services with Yandex Mirror for faster substitutes
+(define %my-desktop-services
+  (modify-services %desktop-services
+    (guix-service-type config =>
+      (guix-configuration
+        (inherit config)
+        (substitute-urls
+         ;; Add Yandex Mirror first in the list
+         (append (list "https://mirror.yandex.ru/mirrors/guix/")
+                 %default-substitute-urls))))))
 
 (operating-system
   (host-name "guix-vm")
@@ -65,5 +76,5 @@
                           ;; Spice Agent: Critical for Copy/Paste and auto-resizing in QEMU
                           (service spice-vdagent-service-type))
 
-                    ;; Standard desktop services (includes graphical interface, login manager, etc.)
-                    %desktop-services)))
+                    ;; Use our modified desktop services (with Yandex mirror)
+                    %my-desktop-services)))

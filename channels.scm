@@ -1,16 +1,22 @@
 ;; channels.scm
-;; Defines the channels (repositories) for Guix.
-;; We include 'nonguix' here to have access to the standard Linux kernel
-;; (not linux-libre) and proprietary firmware, which is essential for real hardware.
+;; Optimized channels configuration
+;; 1. 'guix': Uses Codeberg mirror (faster git clone/pull than Savannah)
+;; 2. 'nonguix': Provides standard Linux kernel and non-free firmware
 
-(cons*
+(list
+ (channel
+  (name 'guix)
+  (url "https://codeberg.org/guix/guix.git")
+  (introduction
+   (make-channel-introduction
+    "9edb3f66fd807b096b48283debdcddccfea34bad"
+    (openpgp-fingerprint
+     "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
  (channel
   (name 'nonguix)
   (url "https://gitlab.com/nonguix/nonguix")
-  ;; Introduction authenticates the channel code
   (introduction
    (make-channel-introduction
     "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
     (openpgp-fingerprint
-     "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
- %default-channels)
+     "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))
