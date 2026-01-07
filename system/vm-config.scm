@@ -4,22 +4,31 @@
 (define-module (system vm-config)
   #:use-module (guix gexp)
   #:use-module (gnu)
-  #:use-module (gnu packages linux)      ; NEW IMPORT for linux-libre
-  #:use-module (gnu packages certs)      ; NEW IMPORT for nss-certs
-  #:use-module (gnu services networking) ; NEW IMPORT for dhcp-client-configuration
-  #:use-module (gnu services spice))
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages certs)
+  #:use-module (gnu services networking)
+  #:use-module (gnu services spice)
+  #:use-module (gnu services ssh)
+  #:use-module (gnu services desktop))
 
-(use-service-modules desktop networking ssh xorg)
+(use-service-modules desktop networking ssh xorg base)
 (use-package-modules bootloaders certs vim curl version-control package-management)
 
-;; Define desktop services with Yandex Mirror for faster substitutes
+;; Define desktop services with Yandex Mirror
+;; We REMOVE NetworkManager to use simple DHCP (dhcp-client-service-type) instead.
+;; This avoids conflicts and ensures the network comes up reliably for SSH 
+;; without needing a graphical login first.
 (define %my-desktop-services
-  (modify-services %desktop-services
+  (modify-services (remove (lambda (service)
+                             (member (service-kind service)
+                                     (list network-manager-service-type
+                                           modem-manager-service-type
+                                           usb-modeswitch-service-type)))
+                           %desktop-services)
     (guix-service-type config =>
       (guix-configuration
         (inherit config)
         (substitute-urls
-         ;; Add Yandex Mirror first in the list
          (append (list "https://mirror.yandex.ru/mirrors/guix/")
                  %default-substitute-urls))))))
 
@@ -28,19 +37,15 @@
   (timezone "Europe/Moscow")
   (locale "en_US.utf8")
 
-  ;; Use the standard linux-libre kernel.
-  ;; For QEMU, we don't strictly need 'linux' (nonguix) unless testing specific proprietary drivers.
-  ;; VirtIO drivers are fully free and included in linux-libre.
+  ;; Linux-libre kernel (standard for Guix)
   (kernel linux-libre)
 
   ;; Bootloader configuration
-  ;; We assume the VM disk is /dev/vda
   (bootloader (bootloader-configuration
                 (bootloader grub-bootloader)
                 (targets '("/dev/vda"))))
 
   ;; Filesystem configuration
-  ;; Basic partition layout: /dev/vda1 -> /
   (file-systems (cons (file-system
                         (mount-point "/")
                         (device "/dev/vda1")
@@ -48,7 +53,7 @@
                       %base-file-systems))
 
   ;; Users
-  ;; Default password for 'neg' is 'guix' (generated via `mkpasswd -m sha-512`)
+  ;; Password 'guix' for user 'neg'
   (users (cons (user-account
                 (name "neg")
                 (group "users")
@@ -56,25 +61,27 @@
                 (supplementary-groups '("wheel" "netdev" "audio" "video")))
                %base-user-accounts))
 
-  ;; Packages to install system-wide
+  ;; Packages
   (packages (append (list vim
                           git
                           curl
-                          nss-certs ;; SSL certificates for HTTPS
-                          )
+                          nss-certs)
                     %base-packages))
 
   ;; System Services
   (services (append (list
-                          ;; SSH access
-                          (service openssh-service-type)
+                          ;; SSH Service - Critical for remote access
+                          (service openssh-service-type
+                                   (openssh-configuration
+                                     (permit-root-login #t)
+                                     (x11-forwarding? #t)))
 
-                          ;; Networking via DHCP (Updated for modern Guix)
-                          (service static-networking-service-type
-                                   (list (dhcp-client-configuration)))
+                          ;; DHCP Client - Simple, robust networking for VM
+                          ;; Replaces NetworkManager to guarantee boot-time IP for SSH
+                          (service dhcp-client-service-type)
 
-                          ;; Spice Agent: Critical for Copy/Paste and auto-resizing in QEMU
+                          ;; Spice Agent - For copy/paste and resize integration in QEMU
                           (service spice-vdagent-service-type))
 
-                    ;; Use our modified desktop services (with Yandex mirror)
+                    ;; Modified desktop services (w/o NetworkManager)
                     %my-desktop-services)))
