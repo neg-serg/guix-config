@@ -1,0 +1,23 @@
+name: Check Configuration
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  check-system:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Guix
+      uses: PromyLOPh/guix-install-action@v1
+      # We need channels.scm because we might use nonguix symbols or specific package sets
+      with:
+        channels: 'channels.scm'
+
+    - name: Check system configuration
+      # Use --dry-run to validate the configuration graph without building everything
+      run: guix system build --dry-run -L . system/vm-config.scm
