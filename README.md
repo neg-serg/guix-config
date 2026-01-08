@@ -26,6 +26,19 @@ Reconfigure the system to apply all settings (including the Yandex mirror for fu
 sudo guix system reconfigure -L . system/vm-config.scm
 ```
 
+### 4. Apply User Configuration (Guix Home)
+The user configuration (dotfiles, shell, git) is managed via **Guix Home**.
+Since the current directory is mounted at `/mnt/host` inside the VM (when using `run-vm.sh`), you can apply it directly:
+
+```bash
+guix home reconfigure /mnt/host/home/home-config.scm
+```
+
+This will:
+- Install your CLI packages (zsh, git, neovim, etc.)
+- Configure Zsh aliases and plugins
+- Setup Git user and config
+
 ## Features
 
 - **Mirrors:** Codeberg (Git) + Yandex (Binaries) for max speed.
