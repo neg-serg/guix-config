@@ -11,9 +11,10 @@ echo "Password: guix"
 
 # Run the VM with:
 # -m 4G: 4GB RAM
-# -smp 2: 2 CPU cores
+# -smp 8: 8 CPU cores
 # -enable-kvm: Hardware acceleration (linux only)
 # -nic ...: Networking with port forwarding (Host 2222 -> Guest 22)
+# -virtfs ...: Share current directory with VM (mount at /mnt/host)
 "$VM_SCRIPT" \
     -m 4G \
     -smp 8 \
@@ -23,4 +24,5 @@ echo "Password: guix"
     -device virtio-rng-pci \
     -device virtio-balloon-pci \
     -nic user,model=virtio-net-pci,hostfwd=tcp::2222-:22 \
+    -virtfs local,path=$(pwd),mount_tag=host-share,security_model=none,id=host-share \
     "$@"
