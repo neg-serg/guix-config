@@ -87,7 +87,6 @@
   (packages (append (list vim
                           git
                           curl
-                          nss-certs
                           zsh
                           zsh-autosuggestions
                           zsh-syntax-highlighting)
@@ -106,11 +105,7 @@
                           (service dhcpcd-service-type)
 
                           ;; Spice Agent - For copy/paste and resize integration in QEMU
-                          (service spice-vdagent-service-type)
-
-                          ;; Avahi - Local network service discovery (mDNS)
-                          ;; Makes VM accessible as <hostname>.local
-                          (service avahi-service-type))
+                          (service spice-vdagent-service-type))
 
                     ;; Modified desktop services (w/o NetworkManager)
                     %my-desktop-services)))
