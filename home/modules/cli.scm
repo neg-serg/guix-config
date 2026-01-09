@@ -52,7 +52,8 @@
    ;; Misc
    (specification->package "neovim")
    (specification->package "tmux")
-   (specification->package "starship") ; prompts (oh-my-posh might need manual install/nonguix)
+   (specification->package "starship") ; prompts
+   (specification->package "mpv")      ; media player
    ))
 
 (define cli-packages-service
