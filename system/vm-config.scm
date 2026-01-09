@@ -9,6 +9,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages certs)
   #:use-module (gnu packages nss)
+  #:use-module (gnu packages shellutils)
   #:use-module (gnu services networking)
   #:use-module (gnu services spice)
   #:use-module (gnu services avahi)
