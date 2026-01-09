@@ -4,6 +4,7 @@
 (define-module (system vm-config)
   #:use-module (guix gexp)
   #:use-module (gnu)
+  #:use-module (srfi srfi-1)
   #:use-module (nongnu packages linux)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages certs)
@@ -100,7 +101,7 @@
 
                           ;; DHCP Client - Simple, robust networking for VM
                           ;; Replaces NetworkManager to guarantee boot-time IP for SSH
-                          (service dhcp-client-service-type)
+                          (service dhcpcd-service-type)
 
                           ;; Spice Agent - For copy/paste and resize integration in QEMU
                           (service spice-vdagent-service-type)
